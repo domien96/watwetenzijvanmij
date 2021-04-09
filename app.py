@@ -31,15 +31,16 @@ def prepare_search_result(res):
     irrelevant_names = ['idx', 'leakage day', 'lkge hour', 'lkge sec']
     idx_in_record = [0, 1, 2, 3, 4, 5, -8, -7, -6, -5, -4, -3, -2, -1]
     if (res == None):
-        return [],[n for n in names if n not in irrelevant_names]
-    res = res.replace('\n', '').split(',')
-    resmap = {}
-    for i in range(len(names)):
-        name = names[i]
-        if (name not in irrelevant_names):
-            resmap[name] = res[idx_in_record[i]]
-    leaked = [key  for (key, val) in resmap.items() if val != '']   
-    unleaked = [key for (key, val) in resmap.items() if val == '']
+        leaked, unleaked = [],[n for n in names if n not in irrelevant_names]
+    else:
+        res = res.replace('\n', '').split(',')
+        resmap = {}
+        for i in range(len(names)):
+            name = names[i]
+            if (name not in irrelevant_names):
+                resmap[name] = res[idx_in_record[i]]
+        leaked = [key  for (key, val) in resmap.items() if val != '']   
+        unleaked = [key for (key, val) in resmap.items() if val == '']
     unleaked.append('Rekeningnummer')
     return leaked, unleaked
 
