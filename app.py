@@ -39,8 +39,9 @@ def prepare_search_result(res):
         name = names[i]
         if (name not in irrelevant_names):
             resmap[name] = res[idx_in_record[i]]
-    leaked = {key:val  for (key, val) in resmap.items() if val != ''}   
-    unleaked = {key:'' for (key, val) in resmap.items() if val == ''}
+    leaked = [key  for (key, val) in resmap.items() if val != '']   
+    unleaked = [key for (key, val) in resmap.items() if val == '']
+    unleaked.append('Rekeningnummer')
     return leaked, unleaked
 
 # Run the application
