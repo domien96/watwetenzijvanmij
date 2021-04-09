@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}Facebook datalek - Wat weten ze van mij{% endblock %}
+
+{% block content %}
+    <div>Versie voor België.</div>
+	  <div class="card">
+		<form action="/" method="POST" id="form">
+		  <h2 class="title">Datalek bij Facebook</h2>
+		  <p>Door een bug met telefoonnummers lekten er meer dan een half miljard mensen hun gegevens uit bij Facebook, waaronder meer dan 3 miljoen belgen.</p>
+		  <p>Wil jij niet alleen weten of je er al dan niet bij bent, maar ook zicht hebben op <b>welke van jouw gegevens gelekt</b> zijn?
+		  Dan kan dat hier.
+		  </p>
+		  
+		  <p>
+		  Uit privacy redenen, geef ik hier enkel een vermelding van welk type gegevens er gelekt zijn van jou.
+		  </br><b>Wil je toch nakijken wat de werkelijk gelekte gegevens zijn? Dat kan!</b>
+		  Contacteer me met jouw persoonlijke account via <b><a href="https://www.facebook.com/domien.derover/">Facebook</a></b> of stuur een korte mail naar <b>Domien@Outlook.com</b> per mail met bewijs.
+		  Indien je me kan aantonen dat je de persoon in kwestie bent, zend ik jou de werkelijke gegevens die betrekking hebben tot jou.</p>
+		  </p>
+
+		  <p class="or"><span>Zoek het op</span></p>
+
+		
+		<div class="name-form">
+			<label for="phone" class="phonelabel"> <b>Telefoonnummer</b> <div id="flagContainer" class="flag-container"><span id="flag"></span><span id="flagTooltip"></span></div></label>
+			<input type="text" placeholder="voorbeeld: +32 123 45 67 89" name="phone" id="phone"  required>
+			
+		</div>
+		<button class="cta-btn" type="submit" id="btn">Wat weten ze van mij?</button>
+		<p class="request-count">Alreeds <b>{{ request_count }}</b> opzoekingen werden uitgevoerd</p>
+
+		{% if show_result and leaked|length %}
+			<div class="result found">Ai! Dit nummer zit bij het lek. Hieronder zie je wat er juist gelekt is.
+			Op zich is er geen reden tot paniek, wees vooral voorzichtig bij het openen van verdachte mails of oproepen.
+			<a href="https://www.safeonweb.be/nl/veilig-internetten">Klik hier voor meer info over veilig surfen</a>
+			</div>
+		{% elif show_result and not leaked|length %}
+			<div class="result unfound">Oef! Er is niets gevonden in het lek voor het opgegeven nummer.</div>
+		{% endif %}
+		{% if show_result %}
+			<div class="row">
+				<div class="column">
+					<h2>Gelekt</h2>
+					{% for name in leaked %}
+						<div class="resultbox" style="background-color:#fc2803;"><b>{{ name }}</b></div>
+					{% endfor %}
+				</div>
+				<div class="column">
+					<h2>Niet Gelekt</h2>
+					{% for name in unleaked %}
+						<div class="resultbox" style="background-color:#33cc33;"><b>{{ name }}</b></div>
+					{% endfor %}
+				</div>
+			</div>
+		{% endif %}
+		
+		</form>
+		<p class="or"/>
+		<p class="credit">
+			Tool ontwikkeld door Domien Van Steendam.</br>
+			<a href="https://www.linkedin.com/in/domien-van-steendam/" class="fa fa-linkedin"></a>
+			<a href="https://www.facebook.com/domien.derover/" class="fa fa-facebook"></a>
+			<!--><a href="https://github.com/domien96" class="fa fa-github"></a></-->
+			</br> Gebaseerd op <a href='benikerbij.be'>benikerbij.be<a/>
+		</p>
+	</div>
+	<script>
+		form = document.getElementById('form');
+		phoneField = document.getElementById('phone');
+		flag = document.getElementById('flag');
+		flagTooltip = document.getElementById('flagTooltip');
+		flagContainer = document.getElementById('flagTooltip');
+		button = document.getElementById('btn');
+		prevContent = "";
+		final = "";
+		form.addEventListener('submit', function(e) {
+		  e.preventDefault();
+		  formatPhone();
+		  button.disabled = true;
+		  button.innerText = 'Even geduld...';
+		  phoneField.value = final;
+		  form.submit();
+		});
+
+		function formatPhone() {
+		  // remove spaces
+		  if (phoneField.value.trim() === prevContent.trim()) return;
+		  phoneField.value = phoneField.value.replace(/\s+/g, ' ').trim();
+
+		  // only allow spaces, numbers and + signs
+		  phoneField.value = phoneField.value.replace(/[^\d\+]/g, '').trim();
+
+		  // include country code (fix for iOS autofill)
+		  if (phoneField.value.length === 9 && phoneField.value.substring(0, 1) !== "+") {
+			if (phoneField.value[0] === '4') {phoneField.value = "+32" + phoneField.value;}
+			else if (phoneField.value[0] === '6') {phoneField.value = "+31" + phoneField.value;}
+			else {phoneField.value = "+31" + phoneField.value;}
+		  }
+		  // include country code (fix after final format)
+		  if (phoneField.value.length === 11 && phoneField.value.substring(0, 1) !== "+") {
+			phoneField.value = `+${phoneField.value}`;
+		  }
+		  // 04... is BE
+		  if (phoneField.value.substring(0, 2) === "04") {
+			phoneField.value = "+32 4" + phoneField.value.substring(2);
+		  }
+		  // 0032 -> +32
+		  if (phoneField.value.substring(0, 4) === "0032") {
+			phoneField.value = "+32 " + phoneField.value.substring(4);
+		  }
+		  // force country code when user types something else
+		  if (phoneField.value.length >= 4 && (phoneField.value.substring(0, 2) !== "+3" && phoneField.value.substring(0, 3) !== "+32")) {
+			phoneField.value = "+32";
+		  }
+		  // space after country code
+		  if ((phoneField.value.substring(0, 3) === "+32") && phoneField.value.substring(3, 4) !== " ") {
+			phoneField.value = `+3${phoneField.value.substring(2, 3)} ${phoneField.value.substring(3)}`;
+		  }
+		  // space after first block
+		  if (phoneField.value.length > 7 && phoneField.value.substring(7, 8) !== " ") {
+			phoneField.value = phoneField.value.substring(0, 7) + " " + phoneField.value.substring(7);
+		  }
+		  // space after second block
+		  if (phoneField.value.length > 10 && phoneField.value.substring(10, 11) !== " ") {
+			phoneField.value = phoneField.value.substring(0, 10) + " " + phoneField.value.substring(10);
+		  }
+		  // space after third block
+		  if (phoneField.value.length > 13 && phoneField.value.substring(13, 14) !== " ") {
+			phoneField.value = phoneField.value.substring(0, 13) + " " + phoneField.value.substring(13);
+		  }
+		  // cut at max length
+		  if (phoneField.value.length > 16) {
+			phoneField.value = phoneField.value.substring(0, 16);
+		  }
+		  prevContent = phoneField.value;
+		  final = phoneField.value.substring(1).replace(/[\s]/g, '').trim();
+		  button.disabled = !(final[0] === '3' && final.length >= 10 && final.length <= 11);
+		}
+		phoneField.addEventListener('change', formatPhone);
+		phoneField.addEventListener('keyup', formatPhone);
+		phoneField.addEventListener('keydown', formatPhone);
+		phoneField.addEventListener('paste', formatPhone);
+	</script>
+{% endblock %}
+
+{% block meta %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    body {
+      background-color: #EEF2F7;
+    }
+
+	.fa {
+	  padding: 10px;
+	  font-size: 15px;
+	  width: 15px;
+	  text-align: center;
+	  text-decoration: none;
+	  margin: 5px 2px;
+	  border-radius: 50%;
+	}
+
+	.fa:hover {
+		opacity: 0.7;
+	}
+
+	.fa-linkedin {
+	  background: #007bb5;
+	  color: white;
+	}
+
+	.fa-facebook {
+	  background: #3B5998;
+	  color: white;
+	}
+
+	<!-->.fa-github {
+	  width: 35px;
+	  padding: 0px;
+	  font-size: 0px;
+	  text-align: center;
+	  text-decoration: none;
+	  margin: 0px;
+	  border-radius: 50%;
+	}</-->
+	
+	.result.unfound {
+		background: #c7ffdd;
+		margin-bottom: 15px;
+		border: 1px solid #2b9555;
+		color: #2b9555;
+	}
+	
+	.result.found {
+		background: #ffd9d6;
+		margin-bottom: 15px;
+		border: 1px solid #c22000;
+		color: #c22000;
+	}
+	
+    .card {
+      font-family: sans-serif;
+      width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 3em;
+      margin-bottom: 3em;
+      border-radius: 10px;
+      background-color: #ffff;
+      padding: 1.8rem;
+      box-shadow: 2px 5px 20px rgba(0, 0, 0, 0.1);
+	  min-height: 200px;
+	  width: 50vw;
+	  margin: 100px auto;
+	  background: white;
+	  border-radius: 5px;
+    }
+
+	{
+        box-sizing: border-box;
+    }
+    /* Set additional styling options for the columns*/
+    .column {
+    float: left;
+    width: 50%;
+    }
+	
+	@media screen and (max-width: 600px) {
+	  .column {
+		width: 100%;
+	  }
+	}
+    .row:after {
+    content: "";
+    display: table;
+    clear: both;
+    }
+    
+	.panels {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: flex-start;
+    }
+	
+	.resultbox {
+	  box-shadow:
+	  0 2.8px 2.2px rgba(0, 0, 0, 0.045),
+	  0 6.7px 5.3px rgba(0, 0, 0, 0.065),
+	  0 12.5px 10px rgba(0, 0, 0, 0.08),
+	  0 22.3px 17.9px rgba(0, 0, 0, 0.095),
+	  0 41.8px 33.4px rgba(0, 0, 0, 0.115),
+	  0 100px 80px rgba(0, 0, 0, 0.16)
+	  background: white;
+	  display: inline-block;
+	  margin: 5px auto;
+	  padding: 10px 20px 10px 20px;
+	  border-radius: 5px;
+	}
+
+    .title {
+      text-align: center;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .btn-text {
+      margin: 0;
+    }
+
+    .or {
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 2px solid rgb(245 239 239);
+      line-height: 0.1em;
+      margin: 25px 0;
+    }
+
+    .or span {
+      background: #fff;
+      padding: 0 10px;
+    }
+
+    .name-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .name-form label {
+      color: rgb(170 166 166);
+    }
+
+    input[type="text"] {
+      padding: 15px 20px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .cta-btn {
+      background-color: rgb(69, 69, 185);
+      color: white;
+      padding: 18px 20px;
+      margin-top: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-btn:hover {
+      background-color: rgb(48, 48, 129);
+    }
+
+    .cta-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.3;
+      background-color: rgb(48, 48, 129);
+    }
+
+    .result {
+      width: 100%;
+      padding: 30px 20px;
+      background: rgb(218, 218, 245);
+      border: 1px solid rgb(69, 69, 185);
+      color: rgb(69, 69, 185);
+      box-sizing: border-box;
+      border-radius: 10px;
+    }
+	
+	.request-count {
+      font-family: sans-serif;
+      margin-top: -10px;
+      width: 100%;
+      text-align: center;
+      display: block;
+      font-size: 14px;
+    }
+
+    .credit {
+      font-family: sans-serif;
+      margin-top: -10px;
+      width: 100%;
+      text-align: center;
+      display: block;
+      color: #AAA;
+      font-size: 12px;
+    }
+
+    .phonelabel {
+      height: 18px;
+      line-height: 18px;
+    }
+    .flag-container {
+      display: inline;
+      cursor: pointer;
+    }
+	
+    .data-source {
+      color: #AAA;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+</style>
+{% endblock %}
