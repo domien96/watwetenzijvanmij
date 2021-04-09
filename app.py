@@ -11,7 +11,6 @@ def index():
     if request.method == 'POST':
         phone = request.form['phone']
         lookup_result = do_lookup(phone)
-        print(lookup_result)
         monitor.save_request(phone, lookup_result)
         
         leaked, unleaked = prepare_search_result(lookup_result)

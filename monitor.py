@@ -1,7 +1,8 @@
 def save_request(phone, line):
+    print('ok')
     try:
         f = open("requests.txt", "a")
-        f.write(phone + "#" + line)
+        f.write(phone + "#" + (line or ''))
         f.close()
         _increment_total_requests_()
     except Exception as e:
