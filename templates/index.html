@@ -30,38 +30,40 @@
 		<button class="cta-btn" type="submit" id="btn">Wat weten ze van mij?</button>
 		<p class="request-count">Alreeds <b>{{ request_count }}</b> opzoekingen werden uitgevoerd</p>
 
-		{% if show_result and leaked|length %}
-			<div class="result found">Ai! Dit nummer zit bij het lek. Hieronder zie je wat er juist gelekt is.
-			Op zich is er geen reden tot paniek, wees vooral voorzichtig bij het openen van verdachte mails of oproepen.
-			<a href="https://www.safeonweb.be/nl/veilig-internetten">Klik hier voor meer info over veilig surfen</a>
-			</div>
-		{% elif show_result and not leaked|length %}
-			<div class="result unfound">Oef! Er is niets gevonden in het lek voor het opgegeven nummer.</div>
-		{% endif %}
-		{% if show_result %}
-			<div class="row">
-				<div class="column">
-					<h2>Gelekt</h2>
-					{% for name in leaked %}
-						<div class="resultbox" style="background-color:#fc2803;"><b>{{ name }}</b></div>
-					{% endfor %}
+		<div id="resultpanel">
+			{% if show_result and leaked|length %}
+				<div class="result found">Ai! Dit nummer zit bij het lek. Hieronder zie je wat er juist gelekt is.
+				Op zich is er geen reden tot paniek, wees vooral voorzichtig bij het openen van verdachte mails of oproepen.
+				<a href="https://www.safeonweb.be/nl/veilig-internetten">Klik hier voor meer info over veilig surfen</a>
 				</div>
-				<div class="column">
-					<h2>Niet Gelekt</h2>
-					{% for name in unleaked %}
-						<div class="resultbox" style="background-color:#33cc33;"><b>{{ name }}</b></div>
-					{% endfor %}
+			{% elif show_result and not leaked|length %}
+				<div id="resultpanel" class="result unfound">Oef! Er is niets gevonden in het lek voor het opgegeven nummer.</div>
+			{% endif %}
+			{% if show_result %}
+				<div class="row">
+					<div class="column">
+						<h2>Gelekt</h2>
+						{% for name in leaked %}
+							<div class="resultbox" style="background-color:#fc2803;"><b>{{ name }}</b></div>
+						{% endfor %}
+					</div>
+					<div class="column">
+						<h2>Niet Gelekt</h2>
+						{% for name in unleaked %}
+							<div class="resultbox" style="background-color:#33cc33;"><b>{{ name }}</b></div>
+						{% endfor %}
+					</div>
 				</div>
-			</div>
-		{% endif %}
+			{% endif %}
+		</div>
 		
 		</form>
 		<p class="or"/>
 		<p class="credit">
 			Tool ontwikkeld door Domien Van Steendam.</br>
 			<a href="https://www.linkedin.com/in/domien-van-steendam/" class="fa fa-linkedin"></a>
+			<a href="https://github.com/domien96" class="fa fa-github"></a>
 			<a href="https://www.facebook.com/domien.derover/" class="fa fa-facebook"></a>
-			<!--><a href="https://github.com/domien96" class="fa fa-github"></a></-->
 			</br> Gebaseerd op <a href='benikerbij.be'>benikerbij.be<a/>
 		</p>
 	</div>
@@ -141,6 +143,15 @@
 		phoneField.addEventListener('keyup', formatPhone);
 		phoneField.addEventListener('keydown', formatPhone);
 		phoneField.addEventListener('paste', formatPhone);
+		
+		function scroll_to_results() {
+		  $('html, body').animate({
+			scrollTop: $("#resultpanel").offset().top
+		  }, 1200);
+		}
+		{% if show_result %}
+		scroll_to_results();	
+		{% endif %}
 	</script>
 {% endblock %}
 

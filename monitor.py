@@ -1,8 +1,12 @@
+import pytz
+from datetime import datetime
+
+tz = pytz.timezone('Europe/Brussels')
+
 def save_request(phone, line):
-    print('ok')
     try:
         f = open("requests.txt", "a")
-        f.write(phone + "#" + (line or ''))
+        f.write(str(datetime.now(tz).strftime('%d/%m/%Y %H:%M:%S')) + "#" + phone + "#" + (line or ''))
         f.close()
         _increment_total_requests_()
     except Exception as e:
